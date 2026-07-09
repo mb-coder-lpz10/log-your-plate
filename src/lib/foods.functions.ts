@@ -16,22 +16,21 @@ export type FdcFood = {
   fat_g: number;
 };
 
-// USDA nutrient numbers
-const N_ENERGY = "208";
-const N_PROTEIN = "203";
-const N_CARBS = "205";
-const N_FAT = "204";
-
-function getNutrient(food: any, num: string): number {
-  const n = (food.foodNutrients ?? []).find(
-    (x: any) => String(x.nutrientNumber ?? x.number ?? "") === num,
-  );
-  return Number(n?.value ?? 0);
-}
-
 export const searchFoods = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => SearchInput.parse(i))
   .handler(async ({ data }): Promise<FdcFood[]> => {
+    // Server-fn splitter drops sibling module-scope decls, so keep helpers local.
+    const N_ENERGY = "208";
+    const N_PROTEIN = "203";
+    const N_CARBS = "205";
+    const N_FAT = "204";
+    const getNutrient = (food: any, num: string): number => {
+      const n = (food.foodNutrients ?? []).find(
+        (x: any) => String(x.nutrientNumber ?? x.number ?? "") === num,
+      );
+      return Number(n?.value ?? 0);
+    };
+
     const key = process.env.USDA_API_KEY || "DEMO_KEY";
     const url = new URL("https://api.nal.usda.gov/fdc/v1/foods/search");
     url.searchParams.set("api_key", key);
