@@ -116,12 +116,12 @@ function LogPage() {
           <div className="mt-4 space-y-2">
             {results !== null && results.length > 0 && (
               <>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">USDA results</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Database results</p>
                 {results.map((f) => (
                   <FoodRow
                     key={f.fdcId}
                     item={{ ...f, fdc_id: f.fdcId }}
-                    subtitle={f.brand}
+                    subtitle={[f.brand, f.source].filter(Boolean).join(" · ")}
                     onClick={() => setSelected({ ...f, fdc_id: f.fdcId })}
                   />
                 ))}
