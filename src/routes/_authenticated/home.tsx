@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Flame, Plus, Trash2, Sparkles, TrendingUp, Droplet, Minus, GlassWater } from "lucide-react";
+import { Flame, Plus, Trash2, Sparkles, TrendingUp, Droplet, Minus } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays } from "date-fns";
 import { motion, AnimatePresence, useSpring, useTransform, useMotionValue } from "framer-motion";
@@ -607,21 +607,18 @@ function WaterCard({ target }: { target: number }) {
 
         <div className="relative mt-4 flex items-center gap-2">
           {[
-            { count: 1, ml: 250 },
-            { count: 2, ml: 500 },
-            { count: 4, ml: 1000 },
+            { label: "+ 1 Glas", ml: 250 },
+            { label: "+ 2 Gläser", ml: 500 },
+            { label: "+ Karaffe", ml: 1000 },
           ].map((opt) => (
             <motion.button
               key={opt.ml}
               whileTap={{ scale: 0.94 }}
               onClick={() => addMut.mutate(opt.ml)}
               disabled={addMut.isPending}
-              aria-label={`Add ${opt.count} glass${opt.count > 1 ? "es" : ""} (${opt.ml} ml)`}
-              className="flex flex-1 items-center justify-center gap-1 rounded-full border border-primary/25 bg-primary/10 py-2 text-primary transition hover:bg-primary/15"
+              className="flex-1 rounded-full border border-primary/25 bg-primary/10 py-2 text-xs font-semibold text-primary transition hover:bg-primary/15"
             >
-              {Array.from({ length: opt.count }).map((_, i) => (
-                <GlassWater key={i} className="h-4 w-4" />
-              ))}
+              {opt.label}
             </motion.button>
           ))}
           <motion.button
