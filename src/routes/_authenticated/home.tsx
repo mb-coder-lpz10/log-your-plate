@@ -606,15 +606,19 @@ function WaterCard({ target }: { target: number }) {
         </div>
 
         <div className="relative mt-4 flex items-center gap-2">
-          {[200, 250, 500].map((ml) => (
+          {[
+            { label: "+ 1 Glas", ml: 250 },
+            { label: "+ 2 Gläser", ml: 500 },
+            { label: "+ Karaffe", ml: 1000 },
+          ].map((opt) => (
             <motion.button
-              key={ml}
+              key={opt.ml}
               whileTap={{ scale: 0.94 }}
-              onClick={() => addMut.mutate(ml)}
+              onClick={() => addMut.mutate(opt.ml)}
               disabled={addMut.isPending}
               className="flex-1 rounded-full border border-primary/25 bg-primary/10 py-2 text-xs font-semibold text-primary transition hover:bg-primary/15"
             >
-              +{ml} ml
+              {opt.label}
             </motion.button>
           ))}
           <motion.button
