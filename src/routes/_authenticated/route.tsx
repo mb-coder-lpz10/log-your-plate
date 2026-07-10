@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Home, PlusCircle, TrendingUp, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -72,31 +71,23 @@ const TABS = [
 
 function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/80 backdrop-blur-xl">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-md items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom)] pt-2">
         {TABS.map((tab) => (
           <Link
             key={tab.to}
             to={tab.to}
-            className="group relative flex flex-1 flex-col items-center gap-1 py-2 text-xs text-muted-foreground"
+            className="group flex flex-1 flex-col items-center gap-1 py-2 text-xs text-muted-foreground"
+            activeProps={{ className: "text-primary" }}
           >
             {({ isActive }) => (
               <>
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                    className="absolute inset-x-3 inset-y-1 -z-10 rounded-2xl bg-primary/10"
-                  />
-                )}
-                <motion.div
-                  animate={{ scale: isActive ? 1.1 : 1, y: isActive ? -1 : 0 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                >
-                  <tab.icon
-                    className={cn("h-5 w-5", isActive && "text-primary")}
-                  />
-                </motion.div>
+                <tab.icon
+                  className={cn(
+                    "h-5 w-5 transition-transform",
+                    isActive && "scale-110",
+                  )}
+                />
                 <span className={cn("font-medium", isActive && "text-primary")}>
                   {tab.label}
                 </span>

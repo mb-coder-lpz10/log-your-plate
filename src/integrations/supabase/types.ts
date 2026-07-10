@@ -79,7 +79,6 @@ export type Database = {
           target_rate_kg_per_week: number | null
           updated_at: string
           user_id: string
-          water_ml_target: number
           weight_kg: number | null
         }
         Insert: {
@@ -98,7 +97,6 @@ export type Database = {
           target_rate_kg_per_week?: number | null
           updated_at?: string
           user_id: string
-          water_ml_target?: number
           weight_kg?: number | null
         }
         Update: {
@@ -117,32 +115,7 @@ export type Database = {
           target_rate_kg_per_week?: number | null
           updated_at?: string
           user_id?: string
-          water_ml_target?: number
           weight_kg?: number | null
-        }
-        Relationships: []
-      }
-      water_logs: {
-        Row: {
-          amount_ml: number
-          created_at: string
-          id: string
-          logged_on: string
-          user_id: string
-        }
-        Insert: {
-          amount_ml: number
-          created_at?: string
-          id?: string
-          logged_on?: string
-          user_id: string
-        }
-        Update: {
-          amount_ml?: number
-          created_at?: string
-          id?: string
-          logged_on?: string
-          user_id?: string
         }
         Relationships: []
       }
