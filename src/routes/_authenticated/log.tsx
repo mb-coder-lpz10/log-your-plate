@@ -32,6 +32,9 @@ type FoodItem = {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  sugar_g?: number;
+  fiber_g?: number;
+  sodium_mg?: number;
   fdc_id?: string;
 };
 
@@ -199,6 +202,9 @@ function ServingDialog({
         protein_g: food.protein_g,
         carbs_g: food.carbs_g,
         fat_g: food.fat_g,
+        sugar_g: food.sugar_g ?? 0,
+        fiber_g: food.fiber_g ?? 0,
+        sodium_mg: food.sodium_mg ?? 0,
         fdc_id: food.fdc_id ?? null,
       });
       if (error) throw error;

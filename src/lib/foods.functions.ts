@@ -1,5 +1,4 @@
 // USDA FoodData Central search via server function.
-// Uses DEMO_KEY by default (~30 req/hr shared). Set USDA_API_KEY for higher limits.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -14,16 +13,23 @@ export type FdcFood = {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  sugar_g: number;
+  fiber_g: number;
+  sodium_mg: number;
 };
 
 export const searchFoods = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => SearchInput.parse(i))
   .handler(async ({ data }): Promise<FdcFood[]> => {
-    // Server-fn splitter drops sibling module-scope decls, so keep helpers local.
-    const N_ENERGY = "208";
-    const N_PROTEIN = "203";
-    const N_CARBS = "205";
-    const N_FAT = "204";
+    const N = {
+      energy: "208",
+      protein: "203",
+      carbs: "205",
+      fat: "204",
+      sugar: "269",
+      fiber: "291",
+      sodium: "307",
+    };
     const getNutrient = (food: any, num: string): number => {
       const n = (food.foodNutrients ?? []).find(
         (x: any) => String(x.nutrientNumber ?? x.number ?? "") === num,
@@ -40,24 +46,19 @@ export const searchFoods = createServerFn({ method: "POST" })
 
     const res = await fetch(url.toString());
     if (!res.ok) {
-      console.error("USDA search failed", res.status, await res.text());
+      console.error("USDA search failed", res.status);
       return [];
     }
     const json: any = await res.json();
     const foods = (json.foods ?? []) as any[];
 
     return foods.map((f): FdcFood => {
-      // Branded foods often provide servingSize (g) and per-100g nutrients.
       const servingSize = Number(f.servingSize ?? 0);
       const servingUnit = f.servingSizeUnit ?? "g";
       const householdText = f.householdServingFullText;
 
-      const cal100 = getNutrient(f, N_ENERGY);
-      const p100 = getNutrient(f, N_PROTEIN);
-      const c100 = getNutrient(f, N_CARBS);
-      const fa100 = getNutrient(f, N_FAT);
-
-      const scale = servingSize > 0 && servingUnit === "g" ? servingSize / 100 : 1;
+      const scale =
+        servingSize > 0 && servingUnit === "g" ? servingSize / 100 : 1;
       const label =
         servingSize > 0
           ? householdText
@@ -65,15 +66,19 @@ export const searchFoods = createServerFn({ method: "POST" })
             : `${servingSize} ${servingUnit}`
           : "100 g";
 
+      const r1 = (v: number) => Math.round(v * 10) / 10;
       return {
         fdcId: String(f.fdcId),
         name: f.description ?? "Unknown",
         brand: f.brandOwner ?? f.brandName ?? undefined,
         serving_label: label,
-        calories: Math.round(cal100 * scale),
-        protein_g: Math.round(p100 * scale * 10) / 10,
-        carbs_g: Math.round(c100 * scale * 10) / 10,
-        fat_g: Math.round(fa100 * scale * 10) / 10,
+        calories: Math.round(getNutrient(f, N.energy) * scale),
+        protein_g: r1(getNutrient(f, N.protein) * scale),
+        carbs_g: r1(getNutrient(f, N.carbs) * scale),
+        fat_g: r1(getNutrient(f, N.fat) * scale),
+        sugar_g: r1(getNutrient(f, N.sugar) * scale),
+        fiber_g: r1(getNutrient(f, N.fiber) * scale),
+        sodium_mg: Math.round(getNutrient(f, N.sodium) * scale),
       };
     });
   });
