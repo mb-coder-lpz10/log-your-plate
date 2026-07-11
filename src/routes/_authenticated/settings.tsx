@@ -75,9 +75,9 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-md px-5 pt-8">
-      <h1 className="text-4xl">Settings</h1>
+      <h1 className="text-4xl">Einstellungen</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Adjust your daily targets or sign out.
+        Passe deine Tagesziele an oder melde dich ab.
       </p>
 
       <Card className="mt-5 rounded-2xl border-border/60 p-5">
@@ -86,14 +86,18 @@ function SettingsPage() {
       </Card>
 
       <Card className="mt-4 rounded-2xl border-border/60 p-5">
-        <h2 className="text-lg font-semibold">Daily targets</h2>
+        <h2 className="text-lg font-semibold">Tagesziele</h2>
         <div className="mt-3 space-y-3">
-          <Row label="Calories (kcal)" v={cal} set={setCal} />
+          <Row label="Kalorien (kcal)" v={cal} set={setCal} />
           <Row label="Protein (g)" v={p} set={setP} />
-          <Row label="Carbs (g)" v={c} set={setC} />
-          <Row label="Fat (g)" v={f} set={setF} />
+          <Row label="Kohlenhydrate (g)" v={c} set={setC} />
+          <Row label="Fett (g)" v={f} set={setF} />
+          <Row label="Zucker max (g)" v={sugar} set={setSugar} />
+          <Row label="Ballaststoffe (g)" v={fiber} set={setFiber} />
+          <Row label="Wasser (ml)" v={water} set={setWater} />
+          <Row label="Schlaf (h)" v={sleepH} set={setSleepH} step={0.5} />
         </div>
-        <Button onClick={save} className="mt-4 w-full rounded-full">Save targets</Button>
+        <Button onClick={save} className="mt-4 w-full rounded-full">Speichern</Button>
       </Card>
 
       <Card className="mt-4 rounded-2xl border-border/60 p-5">
@@ -101,7 +105,7 @@ function SettingsPage() {
           onClick={() => navigate({ to: "/onboarding" })}
           className="w-full text-left text-sm font-medium text-primary hover:underline"
         >
-          Re-run onboarding
+          Onboarding erneut durchlaufen
         </button>
       </Card>
 
@@ -110,21 +114,22 @@ function SettingsPage() {
         variant="outline"
         className="mt-4 w-full rounded-full"
       >
-        <LogOut className="mr-2 h-4 w-4" /> Sign out
+        <LogOut className="mr-2 h-4 w-4" /> Abmelden
       </Button>
     </div>
   );
 }
 
-function Row({ label, v, set }: { label: string; v: number; set: (n: number) => void }) {
+function Row({ label, v, set, step = 1 }: { label: string; v: number; set: (n: number) => void; step?: number }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <Label className="text-sm">{label}</Label>
       <Input
         type="number"
         min="0"
+        step={step}
         value={v}
-        onChange={(e) => set(parseInt(e.target.value) || 0)}
+        onChange={(e) => set(parseFloat(e.target.value) || 0)}
         className="w-28 rounded-xl text-right"
       />
     </div>
