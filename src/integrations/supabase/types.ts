@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           fat_g: number
           fdc_id: string | null
+          fiber_g: number
           food_name: string
           id: string
           logged_on: string
@@ -28,6 +29,8 @@ export type Database = {
           protein_g: number
           serving_label: string | null
           servings: number
+          sodium_mg: number
+          sugar_g: number
           user_id: string
         }
         Insert: {
@@ -36,6 +39,7 @@ export type Database = {
           created_at?: string
           fat_g?: number
           fdc_id?: string | null
+          fiber_g?: number
           food_name: string
           id?: string
           logged_on?: string
@@ -43,6 +47,8 @@ export type Database = {
           protein_g?: number
           serving_label?: string | null
           servings?: number
+          sodium_mg?: number
+          sugar_g?: number
           user_id: string
         }
         Update: {
@@ -51,6 +57,7 @@ export type Database = {
           created_at?: string
           fat_g?: number
           fdc_id?: string | null
+          fiber_g?: number
           food_name?: string
           id?: string
           logged_on?: string
@@ -58,6 +65,8 @@ export type Database = {
           protein_g?: number
           serving_label?: string | null
           servings?: number
+          sodium_mg?: number
+          sugar_g?: number
           user_id?: string
         }
         Relationships: []
@@ -69,14 +78,20 @@ export type Database = {
           calorie_target: number | null
           carbs_g: number | null
           created_at: string
+          dietary_prefs: string[] | null
           display_name: string | null
           fat_g: number | null
+          fiber_target_g: number | null
           goal: Database["public"]["Enums"]["goal_type"] | null
+          goal_note: string | null
           height_cm: number | null
           onboarded: boolean
           protein_g: number | null
           sex: Database["public"]["Enums"]["sex_type"] | null
+          sleep_target_hours: number | null
+          sugar_target_g: number | null
           target_rate_kg_per_week: number | null
+          training_days_per_week: number | null
           updated_at: string
           user_id: string
           water_ml_target: number
@@ -88,14 +103,20 @@ export type Database = {
           calorie_target?: number | null
           carbs_g?: number | null
           created_at?: string
+          dietary_prefs?: string[] | null
           display_name?: string | null
           fat_g?: number | null
+          fiber_target_g?: number | null
           goal?: Database["public"]["Enums"]["goal_type"] | null
+          goal_note?: string | null
           height_cm?: number | null
           onboarded?: boolean
           protein_g?: number | null
           sex?: Database["public"]["Enums"]["sex_type"] | null
+          sleep_target_hours?: number | null
+          sugar_target_g?: number | null
           target_rate_kg_per_week?: number | null
+          training_days_per_week?: number | null
           updated_at?: string
           user_id: string
           water_ml_target?: number
@@ -107,18 +128,54 @@ export type Database = {
           calorie_target?: number | null
           carbs_g?: number | null
           created_at?: string
+          dietary_prefs?: string[] | null
           display_name?: string | null
           fat_g?: number | null
+          fiber_target_g?: number | null
           goal?: Database["public"]["Enums"]["goal_type"] | null
+          goal_note?: string | null
           height_cm?: number | null
           onboarded?: boolean
           protein_g?: number | null
           sex?: Database["public"]["Enums"]["sex_type"] | null
+          sleep_target_hours?: number | null
+          sugar_target_g?: number | null
           target_rate_kg_per_week?: number | null
+          training_days_per_week?: number | null
           updated_at?: string
           user_id?: string
           water_ml_target?: number
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      sleep_logs: {
+        Row: {
+          created_at: string
+          hours: number
+          id: string
+          logged_on: string
+          note: string | null
+          quality: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hours: number
+          id?: string
+          logged_on?: string
+          note?: string | null
+          quality?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hours?: number
+          id?: string
+          logged_on?: string
+          note?: string | null
+          quality?: number | null
+          user_id?: string
         }
         Relationships: []
       }
