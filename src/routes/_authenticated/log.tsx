@@ -32,6 +32,9 @@ type FoodItem = {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  sugar_g?: number;
+  fiber_g?: number;
+  sodium_mg?: number;
   fdc_id?: string;
 };
 
