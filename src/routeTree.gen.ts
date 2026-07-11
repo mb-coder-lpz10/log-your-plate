@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedWeightRouteImport } from './routes/_authenticated/weight'
+import { Route as AuthenticatedSleepRouteImport } from './routes/_authenticated/sleep'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedLogRouteImport } from './routes/_authenticated/log'
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedWeightRoute = AuthenticatedWeightRouteImport.update({
   id: '/weight',
   path: '/weight',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSleepRoute = AuthenticatedSleepRouteImport.update({
+  id: '/sleep',
+  path: '/sleep',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/log': typeof AuthenticatedLogRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/sleep': typeof AuthenticatedSleepRoute
   '/weight': typeof AuthenticatedWeightRoute
 }
 export interface FileRoutesByTo {
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/log': typeof AuthenticatedLogRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/sleep': typeof AuthenticatedSleepRoute
   '/weight': typeof AuthenticatedWeightRoute
 }
 export interface FileRoutesById {
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/_authenticated/log': typeof AuthenticatedLogRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/sleep': typeof AuthenticatedSleepRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
 }
 export interface FileRouteTypes {
@@ -96,9 +105,18 @@ export interface FileRouteTypes {
     | '/log'
     | '/onboarding'
     | '/settings'
+    | '/sleep'
     | '/weight'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/home' | '/log' | '/onboarding' | '/settings' | '/weight'
+  to:
+    | '/'
+    | '/auth'
+    | '/home'
+    | '/log'
+    | '/onboarding'
+    | '/settings'
+    | '/sleep'
+    | '/weight'
   id:
     | '__root__'
     | '/'
@@ -108,6 +126,7 @@ export interface FileRouteTypes {
     | '/_authenticated/log'
     | '/_authenticated/onboarding'
     | '/_authenticated/settings'
+    | '/_authenticated/sleep'
     | '/_authenticated/weight'
   fileRoutesById: FileRoutesById
 }
@@ -147,6 +166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWeightRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sleep': {
+      id: '/_authenticated/sleep'
+      path: '/sleep'
+      fullPath: '/sleep'
+      preLoaderRoute: typeof AuthenticatedSleepRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -183,6 +209,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLogRoute: typeof AuthenticatedLogRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSleepRoute: typeof AuthenticatedSleepRoute
   AuthenticatedWeightRoute: typeof AuthenticatedWeightRoute
 }
 
@@ -191,6 +218,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLogRoute: AuthenticatedLogRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSleepRoute: AuthenticatedSleepRoute,
   AuthenticatedWeightRoute: AuthenticatedWeightRoute,
 }
 
