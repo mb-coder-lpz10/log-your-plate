@@ -7,8 +7,9 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, PlusCircle, TrendingUp, Settings } from "lucide-react";
+import { Home, PlusCircle, Moon, TrendingUp, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -26,7 +27,6 @@ function AuthedShell() {
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
 
-  // Gate onboarding: redirect to /onboarding until profile is completed.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -63,10 +63,11 @@ function AuthedShell() {
 }
 
 const TABS = [
-  { to: "/home", label: "Today", icon: Home },
+  { to: "/home", label: "Heute", icon: Home },
   { to: "/log", label: "Log", icon: PlusCircle },
-  { to: "/weight", label: "Weight", icon: TrendingUp },
-  { to: "/settings", label: "Me", icon: Settings },
+  { to: "/sleep", label: "Schlaf", icon: Moon },
+  { to: "/weight", label: "Gewicht", icon: TrendingUp },
+  { to: "/settings", label: "Ich", icon: Settings },
 ] as const;
 
 function BottomNav() {
@@ -77,11 +78,18 @@ function BottomNav() {
           <Link
             key={tab.to}
             to={tab.to}
-            className="group flex flex-1 flex-col items-center gap-1 py-2 text-xs text-muted-foreground"
+            className="group relative flex flex-1 flex-col items-center gap-1 py-2 text-xs text-muted-foreground"
             activeProps={{ className: "text-primary" }}
           >
             {({ isActive }) => (
               <>
+                {isActive && (
+                  <motion.span
+                    layoutId="navdot"
+                    className="absolute -top-0.5 h-1 w-1 rounded-full bg-primary"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
                 <tab.icon
                   className={cn(
                     "h-5 w-5 transition-transform",
