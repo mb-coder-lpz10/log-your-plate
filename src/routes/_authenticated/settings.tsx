@@ -31,6 +31,10 @@ function SettingsPage() {
   const [p, setP] = useState(120);
   const [c, setC] = useState(220);
   const [f, setF] = useState(65);
+  const [water, setWater] = useState(2500);
+  const [sleepH, setSleepH] = useState(8);
+  const [sugar, setSugar] = useState(50);
+  const [fiber, setFiber] = useState(30);
 
   useEffect(() => {
     if (profileQ.data) {
@@ -38,6 +42,10 @@ function SettingsPage() {
       setP(profileQ.data.protein_g ?? 120);
       setC(profileQ.data.carbs_g ?? 220);
       setF(profileQ.data.fat_g ?? 65);
+      setWater(profileQ.data.water_ml_target ?? 2500);
+      setSleepH(Number(profileQ.data.sleep_target_hours ?? 8));
+      setSugar(profileQ.data.sugar_target_g ?? 50);
+      setFiber(profileQ.data.fiber_target_g ?? 30);
     }
   }, [profileQ.data]);
 
@@ -46,10 +54,12 @@ function SettingsPage() {
     if (!u.user) return;
     const { error } = await supabase.from("profiles").update({
       calorie_target: cal, protein_g: p, carbs_g: c, fat_g: f,
+      water_ml_target: water, sleep_target_hours: sleepH,
+      sugar_target_g: sugar, fiber_target_g: fiber,
     }).eq("user_id", u.user.id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Targets updated");
+      toast.success("Ziele aktualisiert");
       qc.invalidateQueries({ queryKey: ["profile"] });
     }
   }
