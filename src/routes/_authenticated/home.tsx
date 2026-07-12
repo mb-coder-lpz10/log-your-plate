@@ -97,6 +97,18 @@ function HomePage() {
     },
   });
 
+  const activityQ = useQuery({
+    queryKey: ["activity_today", date],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase.from("activity_logs")
+        .select("steps, active_kcal, exercise_min")
+        .eq("user_id", u.user.id).eq("logged_on", date).maybeSingle();
+      return data;
+    },
+  });
+
   const delMut = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("food_logs").delete().eq("id", id);
