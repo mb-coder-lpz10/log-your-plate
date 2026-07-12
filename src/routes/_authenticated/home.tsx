@@ -531,3 +531,34 @@ function AnimatedNumber({ value }: { value: number }) {
     </motion.span>
   );
 }
+
+function ActivityCard({ steps, kcal, minutes, target }: { steps: number; kcal: number; minutes: number; target: number }) {
+  const pct = Math.min(100, (steps / target) * 100);
+  return (
+    <Link to="/activity">
+      <Card className="rounded-2xl border-border/60 p-4 transition hover:border-primary/40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-primary">
+            <Footprints className="h-4 w-4" />
+            <p className="text-xs font-semibold uppercase tracking-wide">Bewegung</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kcal} kcal · {minutes} min
+          </p>
+        </div>
+        <p className="mt-2 text-2xl font-semibold">
+          {steps.toLocaleString("de-DE")}
+          <span className="text-xs font-normal text-muted-foreground">/{target.toLocaleString("de-DE")} Schritte</span>
+        </p>
+        <div className="mt-3 h-1.5 rounded-full bg-secondary">
+          <motion.div
+            className="h-full rounded-full bg-primary"
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.8 }}
+          />
+        </div>
+      </Card>
+    </Link>
+  );
+}
