@@ -264,6 +264,16 @@ function HomePage() {
         <SleepCard hours={sleepH} target={sleepTarget} quality={sleepQ.data?.quality} />
       </div>
 
+      {/* Activity */}
+      <div className="mt-3">
+        <ActivityCard
+          steps={activityQ.data?.steps ?? 0}
+          kcal={Math.round(Number(activityQ.data?.active_kcal ?? 0))}
+          minutes={activityQ.data?.exercise_min ?? 0}
+          target={profile?.steps_target ?? 8000}
+        />
+      </div>
+
       {/* Micros */}
       <Card className="mt-4 rounded-2xl border-border/60 p-5">
         <div className="mb-3 flex items-center gap-2">
