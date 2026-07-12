@@ -66,7 +66,8 @@ const TABS = [
   { to: "/home", label: "Heute", icon: Home },
   { to: "/log", label: "Log", icon: PlusCircle },
   { to: "/sleep", label: "Schlaf", icon: Moon },
-  { to: "/weight", label: "Gewicht", icon: TrendingUp },
+  { to: "/activity", label: "Aktiv", icon: Footprints },
+  { to: "/weight", label: "Gewicht", icon: Footprints },
   { to: "/settings", label: "Ich", icon: Settings },
 ] as const;
 
