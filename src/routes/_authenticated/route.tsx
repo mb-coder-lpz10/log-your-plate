@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, PlusCircle, Moon, Footprints, Settings } from "lucide-react";
+import { Home, PlusCircle, Moon, Footprints, TrendingUp, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
