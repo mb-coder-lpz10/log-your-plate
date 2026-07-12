@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          active_kcal: number
+          created_at: string
+          distance_m: number
+          exercise_min: number
+          id: string
+          logged_on: string
+          note: string | null
+          source: Database["public"]["Enums"]["activity_source"]
+          steps: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_kcal?: number
+          created_at?: string
+          distance_m?: number
+          exercise_min?: number
+          id?: string
+          logged_on?: string
+          note?: string | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          steps?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_kcal?: number
+          created_at?: string
+          distance_m?: number
+          exercise_min?: number
+          id?: string
+          logged_on?: string
+          note?: string | null
+          source?: Database["public"]["Enums"]["activity_source"]
+          steps?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       food_logs: {
         Row: {
           calories: number
@@ -89,6 +131,7 @@ export type Database = {
           protein_g: number | null
           sex: Database["public"]["Enums"]["sex_type"] | null
           sleep_target_hours: number | null
+          steps_target: number
           sugar_target_g: number | null
           target_rate_kg_per_week: number | null
           training_days_per_week: number | null
@@ -114,6 +157,7 @@ export type Database = {
           protein_g?: number | null
           sex?: Database["public"]["Enums"]["sex_type"] | null
           sleep_target_hours?: number | null
+          steps_target?: number
           sugar_target_g?: number | null
           target_rate_kg_per_week?: number | null
           training_days_per_week?: number | null
@@ -139,6 +183,7 @@ export type Database = {
           protein_g?: number | null
           sex?: Database["public"]["Enums"]["sex_type"] | null
           sleep_target_hours?: number | null
+          steps_target?: number
           sugar_target_g?: number | null
           target_rate_kg_per_week?: number | null
           training_days_per_week?: number | null
@@ -241,6 +286,12 @@ export type Database = {
         | "moderate"
         | "active"
         | "very_active"
+      activity_source:
+        | "manual"
+        | "google_fit"
+        | "samsung_health"
+        | "apple_health"
+        | "csv"
       goal_type: "lose" | "maintain" | "gain" | "build_muscle"
       meal_type: "breakfast" | "lunch" | "dinner" | "snack"
       sex_type: "male" | "female"
@@ -377,6 +428,13 @@ export const Constants = {
         "moderate",
         "active",
         "very_active",
+      ],
+      activity_source: [
+        "manual",
+        "google_fit",
+        "samsung_health",
+        "apple_health",
+        "csv",
       ],
       goal_type: ["lose", "maintain", "gain", "build_muscle"],
       meal_type: ["breakfast", "lunch", "dinner", "snack"],

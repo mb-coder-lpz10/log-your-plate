@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Flame, Plus, Trash2, Droplets, Moon, Trophy, TrendingUp, Sparkles,
+  Flame, Plus, Trash2, Droplets, Moon, Trophy, TrendingUp, Sparkles, Footprints,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, parseISO } from "date-fns";
@@ -94,6 +94,18 @@ function HomePage() {
         .eq("user_id", u.user.id)
         .gte("logged_on", sinceDate);
       return data ?? [];
+    },
+  });
+
+  const activityQ = useQuery({
+    queryKey: ["activity_today", date],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase.from("activity_logs")
+        .select("steps, active_kcal, exercise_min")
+        .eq("user_id", u.user.id).eq("logged_on", date).maybeSingle();
+      return data;
     },
   });
 
@@ -250,6 +262,16 @@ function HomePage() {
       <div className="mt-4 grid grid-cols-2 gap-3">
         <WaterCard total={waterTotal} target={waterTarget} onAdd={(ml) => addWaterMut.mutate(ml)} />
         <SleepCard hours={sleepH} target={sleepTarget} quality={sleepQ.data?.quality} />
+      </div>
+
+      {/* Activity */}
+      <div className="mt-3">
+        <ActivityCard
+          steps={activityQ.data?.steps ?? 0}
+          kcal={Math.round(Number(activityQ.data?.active_kcal ?? 0))}
+          minutes={activityQ.data?.exercise_min ?? 0}
+          target={profile?.steps_target ?? 8000}
+        />
       </div>
 
       {/* Micros */}
@@ -507,5 +529,36 @@ function AnimatedNumber({ value }: { value: number }) {
     >
       {value}
     </motion.span>
+  );
+}
+
+function ActivityCard({ steps, kcal, minutes, target }: { steps: number; kcal: number; minutes: number; target: number }) {
+  const pct = Math.min(100, (steps / target) * 100);
+  return (
+    <Link to="/activity">
+      <Card className="rounded-2xl border-border/60 p-4 transition hover:border-primary/40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-primary">
+            <Footprints className="h-4 w-4" />
+            <p className="text-xs font-semibold uppercase tracking-wide">Bewegung</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kcal} kcal · {minutes} min
+          </p>
+        </div>
+        <p className="mt-2 text-2xl font-semibold">
+          {steps.toLocaleString("de-DE")}
+          <span className="text-xs font-normal text-muted-foreground">/{target.toLocaleString("de-DE")} Schritte</span>
+        </p>
+        <div className="mt-3 h-1.5 rounded-full bg-secondary">
+          <motion.div
+            className="h-full rounded-full bg-primary"
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.8 }}
+          />
+        </div>
+      </Card>
+    </Link>
   );
 }

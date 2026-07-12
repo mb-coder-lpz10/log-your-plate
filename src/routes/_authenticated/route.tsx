@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, PlusCircle, Moon, TrendingUp, Settings } from "lucide-react";
+import { Home, PlusCircle, Moon, Footprints, TrendingUp, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -66,6 +66,7 @@ const TABS = [
   { to: "/home", label: "Heute", icon: Home },
   { to: "/log", label: "Log", icon: PlusCircle },
   { to: "/sleep", label: "Schlaf", icon: Moon },
+  { to: "/activity", label: "Aktiv", icon: Footprints },
   { to: "/weight", label: "Gewicht", icon: TrendingUp },
   { to: "/settings", label: "Ich", icon: Settings },
 ] as const;
