@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  Flame, Plus, Trash2, Droplets, Moon, Trophy, TrendingUp, Sparkles,
+  Flame, Plus, Trash2, Droplets, Moon, Trophy, TrendingUp, Sparkles, Footprints,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, parseISO } from "date-fns";
