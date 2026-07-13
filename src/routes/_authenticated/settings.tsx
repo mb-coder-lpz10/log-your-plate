@@ -79,7 +79,7 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  const profile = profileQ.data;
+  
 
   return (
     <div className="mx-auto max-w-md px-5 pt-8">
