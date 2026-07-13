@@ -39,6 +39,7 @@ function SettingsPage() {
 
   useEffect(() => {
     if (profileQ.data) {
+      setName(profileQ.data.display_name ?? "");
       setCal(profileQ.data.calorie_target ?? 2000);
       setP(profileQ.data.protein_g ?? 120);
       setC(profileQ.data.carbs_g ?? 220);
