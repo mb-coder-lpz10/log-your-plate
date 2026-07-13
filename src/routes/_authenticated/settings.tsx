@@ -54,14 +54,20 @@ function SettingsPage() {
   async function save() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error("Bitte gib einen Namen ein");
+      return;
+    }
     const { error } = await supabase.from("profiles").update({
+      display_name: trimmed,
       calorie_target: cal, protein_g: p, carbs_g: c, fat_g: f,
       water_ml_target: water, sleep_target_hours: sleepH,
       sugar_target_g: sugar, fiber_target_g: fiber,
     }).eq("user_id", u.user.id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Ziele aktualisiert");
+      toast.success("Gespeichert");
       qc.invalidateQueries({ queryKey: ["profile"] });
     }
   }
