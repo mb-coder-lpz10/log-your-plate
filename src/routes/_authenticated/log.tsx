@@ -1,9 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { searchFoods, type FdcFood } from "@/lib/foods.functions";
+import {
+  searchFoods,
+  lookupBarcode,
+  recognizeMeal,
+  type FdcFood,
+} from "@/lib/foods.functions";
 import { SEED_FOODS } from "@/lib/foods";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +18,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Search, Zap, Loader2 } from "lucide-react";
+import { ArrowLeft, Search, Zap, Loader2, ScanBarcode, Camera, Sparkles } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const searchSchema = z.object({
