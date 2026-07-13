@@ -158,6 +158,26 @@ function Onboarding() {
             {step === 1 && (
               <div className="space-y-5">
                 <div>
+                  <Label htmlFor="displayName">Wie sollen wir dich nennen?</Label>
+                  <Input
+                    id="displayName"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="z.B. Anna"
+                    autoFocus
+                    maxLength={40}
+                    className="mt-2 rounded-xl text-lg"
+                  />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Nur dein Vorname reicht – so begrüßen wir dich persönlich statt mit deiner E-Mail-Adresse.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-5">
+                <div>
                   <Label>Geschlecht</Label>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {(["female", "male"] as Sex[]).map((s) => (
@@ -171,7 +191,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="space-y-5">
                 <NumField label="Größe" value={height} setValue={setHeight} suffix="cm" min={100} max={230} />
                 <NumField label="Gewicht" value={weight} setValue={setWeight} suffix="kg" min={30} max={300} step={0.1} />
@@ -184,7 +204,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-5">
                 <div>
                   <Label>Alltagsaktivität</Label>
@@ -210,7 +230,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <div className="space-y-5">
                 <div>
                   <Label>Dein Ziel</Label>
@@ -239,7 +259,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <div className="space-y-5">
                 <div>
                   <Label>Ziel-Schlafdauer: <span className="font-semibold text-primary">{sleep} h</span></Label>
@@ -265,7 +285,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 6 && (
+            {step === 7 && (
               <div className="space-y-5">
                 <div>
                   <Label>Ernährungsvorlieben (optional)</Label>
