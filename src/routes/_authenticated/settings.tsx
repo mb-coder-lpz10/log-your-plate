@@ -27,6 +27,7 @@ function SettingsPage() {
     },
   });
 
+  const [name, setName] = useState("");
   const [cal, setCal] = useState(2000);
   const [p, setP] = useState(120);
   const [c, setC] = useState(220);
