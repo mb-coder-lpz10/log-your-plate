@@ -31,6 +31,7 @@ const TOTAL = 7;
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [displayName, setDisplayName] = useState("");
   const [sex, setSex] = useState<Sex>("female");
   const [age, setAge] = useState(30);
   const [height, setHeight] = useState(170);
@@ -44,6 +45,18 @@ function Onboarding() {
   const [prefs, setPrefs] = useState<DietPref[]>([]);
   const [goalNote, setGoalNote] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Prefill with any existing (real) display name.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useState(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data } = await supabase.from("profiles").select("display_name").eq("user_id", u.user.id).maybeSingle();
+      if (data?.display_name) setDisplayName(data.display_name);
+    })();
+    return 0;
+  });
 
   const dailyTdee = Math.round(tdee(sex, weight, height, age, activity));
   const calories = calorieTarget(dailyTdee, goal, rate);
