@@ -46,17 +46,20 @@ function Onboarding() {
   const [goalNote, setGoalNote] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Prefill with any existing (real) display name.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useState(() => {
+  useEffect(() => {
+    let cancelled = false;
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const { data } = await supabase.from("profiles").select("display_name").eq("user_id", u.user.id).maybeSingle();
-      if (data?.display_name) setDisplayName(data.display_name);
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", u.user.id)
+        .maybeSingle();
+      if (!cancelled && data?.display_name) setDisplayName(data.display_name);
     })();
-    return 0;
-  });
+    return () => { cancelled = true; };
+  }, []);
 
   const dailyTdee = Math.round(tdee(sex, weight, height, age, activity));
   const calories = calorieTarget(dailyTdee, goal, rate);
