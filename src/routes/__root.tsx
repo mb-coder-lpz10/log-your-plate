@@ -87,10 +87,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "NutriLog — Your warm nutrition companion" },
       {
         property: "og:description",
-        content: "Log meals, track macros, and stay on your goals with a calm, modern nutrition app.",
+        content: "NutriLog is a warm, minimal food and nutrition tracker. Log meals, track macros, and reach your goals.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "NutriLog — Your warm nutrition companion" },
+      { name: "twitter:description", content: "NutriLog is a warm, minimal food and nutrition tracker. Log meals, track macros, and reach your goals." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/YhjIXC5G6EViyb2dcfbfuXcldJA2/social-images/social-1783977518261-image.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/YhjIXC5G6EViyb2dcfbfuXcldJA2/social-images/social-1783977518261-image.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -98,7 +102,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
