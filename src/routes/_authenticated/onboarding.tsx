@@ -75,7 +75,10 @@ function Onboarding() {
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Nicht angemeldet");
+      const trimmedName = displayName.trim();
+      if (!trimmedName) throw new Error("Bitte gib einen Namen ein");
       const { error } = await supabase.from("profiles").update({
+        display_name: trimmedName,
         age,
         sex,
         height_cm: height,
