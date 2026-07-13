@@ -99,12 +99,18 @@ function LogPage() {
       </div>
 
       <Tabs defaultValue="search">
-        <TabsList className="grid w-full grid-cols-2 rounded-full bg-secondary/70">
+        <TabsList className="grid w-full grid-cols-4 rounded-full bg-secondary/70">
           <TabsTrigger value="search" className="rounded-full">
-            <Search className="mr-1.5 h-4 w-4" />Search
+            <Search className="h-4 w-4" />
+          </TabsTrigger>
+          <TabsTrigger value="barcode" className="rounded-full">
+            <ScanBarcode className="h-4 w-4" />
+          </TabsTrigger>
+          <TabsTrigger value="photo" className="rounded-full">
+            <Camera className="h-4 w-4" />
           </TabsTrigger>
           <TabsTrigger value="quick" className="rounded-full">
-            <Zap className="mr-1.5 h-4 w-4" />Quick add
+            <Zap className="h-4 w-4" />
           </TabsTrigger>
         </TabsList>
 
@@ -113,18 +119,18 @@ function LogPage() {
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search foods (e.g. chicken breast)"
+              placeholder="Lebensmittel suchen (z.B. Hähnchenbrust)"
               className="rounded-xl"
             />
             <Button type="submit" disabled={searching} className="rounded-full">
-              {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+              {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Suchen"}
             </Button>
           </form>
 
           <div className="mt-4 space-y-2">
             {results !== null && results.length > 0 && (
               <>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">USDA results</p>
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">USDA Ergebnisse</p>
                 {results.map((f) => (
                   <FoodRow
                     key={f.fdcId}
@@ -136,17 +142,25 @@ function LogPage() {
               </>
             )}
             <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
-              Common foods
+              Beliebte Lebensmittel
             </p>
             {seedMatches.map((f) => (
               <FoodRow key={f.name} item={f} onClick={() => setSelected(f)} />
             ))}
             {seedMatches.length === 0 && results?.length === 0 && (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No results. Try Quick add below.
+                Keine Treffer. Nutze Quick-Add.
               </p>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="barcode" className="mt-4">
+          <BarcodeTab onFound={(f) => setSelected(f)} />
+        </TabsContent>
+
+        <TabsContent value="photo" className="mt-4">
+          <PhotoTab onRecognized={(f) => setSelected(f)} />
         </TabsContent>
 
         <TabsContent value="quick" className="mt-4">
@@ -157,6 +171,209 @@ function LogPage() {
       {selected && (
         <ServingDialog food={selected} meal={meal} onClose={() => setSelected(null)} />
       )}
+    </div>
+  );
+}
+
+// ---------- Barcode ----------
+function BarcodeTab({ onFound }: { onFound: (f: FoodItem) => void }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [manual, setManual] = useState("");
+  const [loading, setLoading] = useState(false);
+  const supported = typeof window !== "undefined" && "BarcodeDetector" in window;
+
+  useEffect(() => {
+    if (!scanning || !supported) return;
+    let stream: MediaStream | null = null;
+    let raf = 0;
+    let cancelled = false;
+    (async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+        // @ts-expect-error - BarcodeDetector is a browser API
+        const detector = new window.BarcodeDetector({
+          formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
+        });
+        const tick = async () => {
+          if (cancelled || !videoRef.current) return;
+          try {
+            const codes = await detector.detect(videoRef.current);
+            if (codes[0]?.rawValue) {
+              setScanning(false);
+              await handleCode(codes[0].rawValue);
+              return;
+            }
+          } catch { /* ignore per-frame errors */ }
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+      } catch (e) {
+        toast.error("Kamera nicht verfügbar");
+        setScanning(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scanning, supported]);
+
+  async function handleCode(code: string) {
+    setLoading(true);
+    try {
+      const food = await lookupBarcode({ data: { code } });
+      if (!food) { toast.error(`Kein Produkt für ${code}`); return; }
+      toast.success(`Gefunden: ${food.name}`);
+      onFound({ ...food, fdc_id: food.fdcId });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Fehler beim Nachschlagen");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {supported ? (
+        scanning ? (
+          <Card className="overflow-hidden rounded-2xl border-border/60 p-0">
+            <video ref={videoRef} className="aspect-square w-full bg-black object-cover" muted playsInline />
+            <div className="flex items-center justify-between p-3">
+              <p className="text-xs text-muted-foreground">Barcode ins Bild halten…</p>
+              <Button variant="outline" size="sm" className="rounded-full" onClick={() => setScanning(false)}>
+                Stop
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <Button onClick={() => setScanning(true)} className="w-full rounded-full">
+            <ScanBarcode className="mr-2 h-4 w-4" /> Kamera starten
+          </Button>
+        )
+      ) : (
+        <p className="rounded-xl bg-secondary/60 p-3 text-xs text-muted-foreground">
+          Live-Scan wird von diesem Browser nicht unterstützt. Nutze Chrome auf Android oder gib den Code manuell ein.
+        </p>
+      )}
+
+      <div>
+        <Label className="text-xs uppercase tracking-widest text-muted-foreground">Manuell eingeben</Label>
+        <form
+          className="mt-1 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (manual.trim()) handleCode(manual.trim());
+          }}
+        >
+          <Input
+            inputMode="numeric"
+            value={manual}
+            onChange={(e) => setManual(e.target.value.replace(/\D/g, ""))}
+            placeholder="EAN / UPC (z.B. 4008400220222)"
+            className="rounded-xl"
+          />
+          <Button type="submit" disabled={loading || !manual} className="rounded-full">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Suchen"}
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Photo ----------
+function PhotoTab({ onRecognized }: { onRecognized: (f: FoodItem) => void }) {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  async function fileToCompressedDataUrl(file: File): Promise<string> {
+    const bitmap = await createImageBitmap(file);
+    const maxDim = 1024;
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    canvas.getContext("2d")!.drawImage(bitmap, 0, 0, w, h);
+    return canvas.toDataURL("image/jpeg", 0.85);
+  }
+
+  async function handleFile(file: File) {
+    setLoading(true);
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
+      setPreview(dataUrl);
+      const meal = await recognizeMeal({ data: { imageDataUrl: dataUrl } });
+      toast.success(`Erkannt: ${meal.name}`);
+      onRecognized({
+        name: meal.name,
+        serving_label: meal.serving_label,
+        calories: meal.calories,
+        protein_g: meal.protein_g,
+        carbs_g: meal.carbs_g,
+        fat_g: meal.fat_g,
+        sugar_g: meal.sugar_g,
+        fiber_g: meal.fiber_g,
+        sodium_mg: meal.sodium_mg,
+      });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erkennung fehlgeschlagen");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleFile(f);
+          e.target.value = "";
+        }}
+      />
+      {preview ? (
+        <Card className="overflow-hidden rounded-2xl border-border/60 p-0">
+          <img src={preview} alt="Mahlzeit" className="aspect-square w-full object-cover" />
+        </Card>
+      ) : (
+        <Card className="flex aspect-square items-center justify-center rounded-2xl border-2 border-dashed border-border/60 bg-secondary/30 p-6 text-center text-sm text-muted-foreground">
+          <div>
+            <Sparkles className="mx-auto mb-2 h-8 w-8 text-primary" />
+            Foto aufnehmen — die KI schätzt Portion & Nährwerte
+          </div>
+        </Card>
+      )}
+      <Button
+        onClick={() => inputRef.current?.click()}
+        disabled={loading}
+        className="w-full rounded-full"
+      >
+        {loading ? (
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analysiere…</>
+        ) : (
+          <><Camera className="mr-2 h-4 w-4" /> {preview ? "Neues Foto" : "Foto aufnehmen"}</>
+        )}
+      </Button>
+      <p className="text-center text-xs text-muted-foreground">
+        Werte sind Schätzungen — überprüfe & passe die Portion an.
+      </p>
     </div>
   );
 }
