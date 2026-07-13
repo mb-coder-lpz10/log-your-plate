@@ -116,6 +116,7 @@ function Onboarding() {
   }
 
   const titles = [
+    "Dein Name",
     "Über dich",
     "Körperdaten",
     "Aktivität",
