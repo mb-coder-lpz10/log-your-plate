@@ -344,7 +344,11 @@ function Onboarding() {
             </Button>
           ) : <div />}
           {step < TOTAL ? (
-            <Button onClick={() => setStep(step + 1)} className="rounded-full px-6">
+            <Button
+              onClick={() => setStep(step + 1)}
+              disabled={step === 1 && !displayName.trim()}
+              className="rounded-full px-6"
+            >
               Weiter
             </Button>
           ) : (
