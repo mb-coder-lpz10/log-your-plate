@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
 });
 
-const TOTAL = 6;
+const TOTAL = 7;
 
 function Onboarding() {
   const navigate = useNavigate();
