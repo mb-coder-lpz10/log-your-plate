@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,11 +26,12 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
 });
 
-const TOTAL = 6;
+const TOTAL = 7;
 
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [displayName, setDisplayName] = useState("");
   const [sex, setSex] = useState<Sex>("female");
   const [age, setAge] = useState(30);
   const [height, setHeight] = useState(170);
@@ -44,6 +45,21 @@ function Onboarding() {
   const [prefs, setPrefs] = useState<DietPref[]>([]);
   const [goalNote, setGoalNote] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", u.user.id)
+        .maybeSingle();
+      if (!cancelled && data?.display_name) setDisplayName(data.display_name);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const dailyTdee = Math.round(tdee(sex, weight, height, age, activity));
   const calories = calorieTarget(dailyTdee, goal, rate);
@@ -59,7 +75,10 @@ function Onboarding() {
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Nicht angemeldet");
+      const trimmedName = displayName.trim();
+      if (!trimmedName) throw new Error("Bitte gib einen Namen ein");
       const { error } = await supabase.from("profiles").update({
+        display_name: trimmedName,
         age,
         sex,
         height_cm: height,
@@ -97,6 +116,7 @@ function Onboarding() {
   }
 
   const titles = [
+    "Dein Name",
     "Über dich",
     "Körperdaten",
     "Aktivität",
@@ -138,6 +158,26 @@ function Onboarding() {
             {step === 1 && (
               <div className="space-y-5">
                 <div>
+                  <Label htmlFor="displayName">Wie sollen wir dich nennen?</Label>
+                  <Input
+                    id="displayName"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="z.B. Anna"
+                    autoFocus
+                    maxLength={40}
+                    className="mt-2 rounded-xl text-lg"
+                  />
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Nur dein Vorname reicht – so begrüßen wir dich persönlich statt mit deiner E-Mail-Adresse.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-5">
+                <div>
                   <Label>Geschlecht</Label>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {(["female", "male"] as Sex[]).map((s) => (
@@ -151,7 +191,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <div className="space-y-5">
                 <NumField label="Größe" value={height} setValue={setHeight} suffix="cm" min={100} max={230} />
                 <NumField label="Gewicht" value={weight} setValue={setWeight} suffix="kg" min={30} max={300} step={0.1} />
@@ -164,7 +204,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="space-y-5">
                 <div>
                   <Label>Alltagsaktivität</Label>
@@ -190,7 +230,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <div className="space-y-5">
                 <div>
                   <Label>Dein Ziel</Label>
@@ -219,7 +259,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <div className="space-y-5">
                 <div>
                   <Label>Ziel-Schlafdauer: <span className="font-semibold text-primary">{sleep} h</span></Label>
@@ -245,7 +285,7 @@ function Onboarding() {
               </div>
             )}
 
-            {step === 6 && (
+            {step === 7 && (
               <div className="space-y-5">
                 <div>
                   <Label>Ernährungsvorlieben (optional)</Label>
@@ -304,7 +344,11 @@ function Onboarding() {
             </Button>
           ) : <div />}
           {step < TOTAL ? (
-            <Button onClick={() => setStep(step + 1)} className="rounded-full px-6">
+            <Button
+              onClick={() => setStep(step + 1)}
+              disabled={step === 1 && !displayName.trim()}
+              className="rounded-full px-6"
+            >
               Weiter
             </Button>
           ) : (

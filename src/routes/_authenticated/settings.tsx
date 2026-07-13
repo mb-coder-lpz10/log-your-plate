@@ -27,6 +27,7 @@ function SettingsPage() {
     },
   });
 
+  const [name, setName] = useState("");
   const [cal, setCal] = useState(2000);
   const [p, setP] = useState(120);
   const [c, setC] = useState(220);
@@ -38,6 +39,7 @@ function SettingsPage() {
 
   useEffect(() => {
     if (profileQ.data) {
+      setName(profileQ.data.display_name ?? "");
       setCal(profileQ.data.calorie_target ?? 2000);
       setP(profileQ.data.protein_g ?? 120);
       setC(profileQ.data.carbs_g ?? 220);
@@ -52,14 +54,20 @@ function SettingsPage() {
   async function save() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast.error("Bitte gib einen Namen ein");
+      return;
+    }
     const { error } = await supabase.from("profiles").update({
+      display_name: trimmed,
       calorie_target: cal, protein_g: p, carbs_g: c, fat_g: f,
       water_ml_target: water, sleep_target_hours: sleepH,
       sugar_target_g: sugar, fiber_target_g: fiber,
     }).eq("user_id", u.user.id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Ziele aktualisiert");
+      toast.success("Gespeichert");
       qc.invalidateQueries({ queryKey: ["profile"] });
     }
   }
@@ -71,7 +79,7 @@ function SettingsPage() {
     navigate({ to: "/auth", replace: true });
   }
 
-  const profile = profileQ.data;
+  
 
   return (
     <div className="mx-auto max-w-md px-5 pt-8">
@@ -81,8 +89,17 @@ function SettingsPage() {
       </p>
 
       <Card className="mt-5 rounded-2xl border-border/60 p-5">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Account</p>
-        <p className="mt-1 text-sm font-medium">{profile?.display_name ?? "—"}</p>
+        <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground">
+          Dein Name
+        </Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="z.B. Anna"
+          maxLength={40}
+          className="mt-2 rounded-xl"
+        />
       </Card>
 
       <Card className="mt-4 rounded-2xl border-border/60 p-5">
