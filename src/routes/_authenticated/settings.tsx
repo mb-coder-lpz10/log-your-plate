@@ -89,8 +89,17 @@ function SettingsPage() {
       </p>
 
       <Card className="mt-5 rounded-2xl border-border/60 p-5">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Account</p>
-        <p className="mt-1 text-sm font-medium">{profile?.display_name ?? "—"}</p>
+        <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground">
+          Dein Name
+        </Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="z.B. Anna"
+          maxLength={40}
+          className="mt-2 rounded-xl"
+        />
       </Card>
 
       <Card className="mt-4 rounded-2xl border-border/60 p-5">
