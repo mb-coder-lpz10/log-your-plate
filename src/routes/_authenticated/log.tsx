@@ -131,27 +131,38 @@ function LogPage() {
           <div className="mt-4 space-y-2">
             {results !== null && results.length > 0 && (
               <>
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">USDA Ergebnisse</p>
+                <SectionLabel icon={<Search className="h-3 w-3" />}>USDA Ergebnisse</SectionLabel>
                 {results.map((f) => (
                   <FoodRow
                     key={f.fdcId}
                     item={{ ...f, fdc_id: f.fdcId }}
                     subtitle={f.brand}
                     onClick={() => setSelected({ ...f, fdc_id: f.fdcId })}
+                    onQuickAdd={() => quickLog({ ...f, fdc_id: f.fdcId }, meal)}
                   />
                 ))}
               </>
             )}
-            <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
-              Beliebte Lebensmittel
-            </p>
-            {seedMatches.map((f) => (
-              <FoodRow key={f.name} item={f} onClick={() => setSelected(f)} />
-            ))}
-            {seedMatches.length === 0 && results?.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Keine Treffer. Nutze Quick-Add.
-              </p>
+
+            {!q && <FavoritesAndRecents meal={meal} onPick={setSelected} />}
+
+            {q && (
+              <>
+                <SectionLabel>Beliebte Lebensmittel</SectionLabel>
+                {seedMatches.map((f) => (
+                  <FoodRow
+                    key={f.name}
+                    item={f}
+                    onClick={() => setSelected(f)}
+                    onQuickAdd={() => quickLog(f, meal)}
+                  />
+                ))}
+                {seedMatches.length === 0 && results?.length === 0 && (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    Keine Treffer. Nutze Quick-Add.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </TabsContent>
