@@ -290,13 +290,13 @@ function HomePage() {
       {/* Weekly trend */}
       <Card className="mt-4 rounded-2xl border-border/60 p-5">
         <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link to="/trends" className="flex items-center gap-2 hover:text-primary">
             <TrendingUp className="h-4 w-4 text-primary" />
             <p className="text-sm font-semibold">Letzte 7 Tage</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ø {Math.round(weekDays.reduce((a, w) => a + w.cal, 0) / 7)} kcal
-          </p>
+          </Link>
+          <Link to="/trends" className="text-xs text-muted-foreground hover:text-primary">
+            Ø {Math.round(weekDays.reduce((a, w) => a + w.cal, 0) / 7)} kcal ›
+          </Link>
         </div>
         <div className="flex h-24 items-end gap-1.5">
           {weekDays.map((w, i) => {
