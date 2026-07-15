@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   searchFoods,
@@ -18,8 +18,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Search, Zap, Loader2, ScanBarcode, Camera, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, Zap, Loader2, ScanBarcode, Camera, Sparkles, Star, Clock, Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   meal: z.enum(["breakfast", "lunch", "dinner", "snack"]).optional(),
