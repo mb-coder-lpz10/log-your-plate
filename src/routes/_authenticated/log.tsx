@@ -391,23 +391,168 @@ function PhotoTab({ onRecognized }: { onRecognized: (f: FoodItem) => void }) {
 }
 
 function FoodRow({
-  item, subtitle, onClick,
-}: { item: FoodItem; subtitle?: string; onClick: () => void }) {
+  item, subtitle, onClick, onQuickAdd,
+}: { item: FoodItem; subtitle?: string; onClick: () => void; onQuickAdd?: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center justify-between rounded-2xl border border-border/60 bg-card p-3 text-left transition hover:border-primary/40 hover:bg-secondary/40"
-    >
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{item.name}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {subtitle ? `${subtitle} · ` : ""}{item.serving_label} · {Math.round(item.calories)} kcal
-        </p>
-      </div>
-      <div className="ml-2 text-xs text-muted-foreground">
-        P{Math.round(item.protein_g)} · C{Math.round(item.carbs_g)} · F{Math.round(item.fat_g)}
-      </div>
-    </button>
+    <div className="flex items-stretch gap-2">
+      <button
+        onClick={onClick}
+        className="flex flex-1 items-center justify-between rounded-2xl border border-border/60 bg-card p-3 text-left transition hover:border-primary/40 hover:bg-secondary/40"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{item.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {subtitle ? `${subtitle} · ` : ""}{item.serving_label} · {Math.round(item.calories)} kcal
+          </p>
+        </div>
+        <div className="ml-2 text-xs text-muted-foreground">
+          P{Math.round(item.protein_g)} · C{Math.round(item.carbs_g)} · F{Math.round(item.fat_g)}
+        </div>
+      </button>
+      {onQuickAdd && (
+        <button
+          onClick={onQuickAdd}
+          aria-label="Sofort loggen"
+          className="flex w-11 items-center justify-center rounded-2xl border border-border/60 bg-card text-primary transition hover:border-primary/40 hover:bg-primary/10"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SectionLabel({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+  return (
+    <p className="mt-3 flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground">
+      {icon}{children}
+    </p>
+  );
+}
+
+async function quickLog(
+  food: FoodItem,
+  meal: "breakfast" | "lunch" | "dinner" | "snack",
+) {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) { toast.error("Nicht angemeldet"); return; }
+  const { error } = await supabase.from("food_logs").insert({
+    user_id: u.user.id,
+    meal,
+    food_name: food.name,
+    servings: 1,
+    serving_label: food.serving_label,
+    calories: food.calories,
+    protein_g: food.protein_g,
+    carbs_g: food.carbs_g,
+    fat_g: food.fat_g,
+    sugar_g: food.sugar_g ?? 0,
+    fiber_g: food.fiber_g ?? 0,
+    sodium_mg: food.sodium_mg ?? 0,
+    fdc_id: food.fdc_id ?? null,
+  });
+  if (error) { toast.error(error.message); return; }
+  toast.success(`${food.name} → ${meal}`);
+}
+
+function FavoritesAndRecents({
+  meal, onPick,
+}: { meal: "breakfast" | "lunch" | "dinner" | "snack"; onPick: (f: FoodItem) => void }) {
+  const qc = useQueryClient();
+
+  const favs = useQuery({
+    queryKey: ["food_favorites"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("food_favorites")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const recents = useQuery({
+    queryKey: ["food_logs", "recent"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("food_logs")
+        .select("food_name, serving_label, calories, protein_g, carbs_g, fat_g, sugar_g, fiber_g, sodium_mg, fdc_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      const seen = new Set<string>();
+      const out: FoodItem[] = [];
+      for (const r of data ?? []) {
+        const key = `${r.food_name}::${r.serving_label ?? ""}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push({
+          name: r.food_name,
+          serving_label: r.serving_label ?? "1 serving",
+          calories: Number(r.calories),
+          protein_g: Number(r.protein_g),
+          carbs_g: Number(r.carbs_g),
+          fat_g: Number(r.fat_g),
+          sugar_g: Number(r.sugar_g ?? 0),
+          fiber_g: Number(r.fiber_g ?? 0),
+          sodium_mg: Number(r.sodium_mg ?? 0),
+          fdc_id: r.fdc_id ?? undefined,
+        });
+        if (out.length >= 8) break;
+      }
+      return out;
+    },
+  });
+
+  const handleQuick = async (f: FoodItem) => {
+    await quickLog(f, meal);
+    qc.invalidateQueries({ queryKey: ["food_logs"] });
+  };
+
+  const favItems: FoodItem[] = (favs.data ?? []).map((f) => ({
+    name: f.food_name,
+    serving_label: f.serving_label ?? "1 serving",
+    calories: Number(f.calories),
+    protein_g: Number(f.protein_g),
+    carbs_g: Number(f.carbs_g),
+    fat_g: Number(f.fat_g),
+    sugar_g: Number(f.sugar_g),
+    fiber_g: Number(f.fiber_g),
+    sodium_mg: Number(f.sodium_mg),
+    fdc_id: f.fdc_id ?? undefined,
+  }));
+
+  return (
+    <>
+      {favItems.length > 0 && (
+        <>
+          <SectionLabel icon={<Star className="h-3 w-3 fill-primary text-primary" />}>Favoriten</SectionLabel>
+          {favItems.map((f) => (
+            <FoodRow key={`fav-${f.name}`} item={f} onClick={() => onPick(f)} onQuickAdd={() => handleQuick(f)} />
+          ))}
+        </>
+      )}
+
+      {(recents.data ?? []).length > 0 && (
+        <>
+          <SectionLabel icon={<Clock className="h-3 w-3" />}>Zuletzt geloggt</SectionLabel>
+          {(recents.data ?? []).map((f) => (
+            <FoodRow key={`r-${f.name}-${f.serving_label}`} item={f} onClick={() => onPick(f)} onQuickAdd={() => handleQuick(f)} />
+          ))}
+        </>
+      )}
+
+      {favItems.length === 0 && (recents.data ?? []).length === 0 && !favs.isLoading && !recents.isLoading && (
+        <>
+          <SectionLabel>Beliebte Lebensmittel</SectionLabel>
+          {SEED_FOODS.slice(0, 10).map((f) => (
+            <FoodRow key={f.name} item={f} onClick={() => onPick(f)} onQuickAdd={() => handleQuick(f)} />
+          ))}
+        </>
+      )}
+    </>
   );
 }
 
