@@ -567,6 +567,53 @@ function ServingDialog({
   const qc = useQueryClient();
   const navigate = useNavigate();
 
+  const favQuery = useQuery({
+    queryKey: ["food_favorites", "check", food.name, food.serving_label],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("food_favorites")
+        .select("id")
+        .eq("food_name", food.name)
+        .eq("serving_label", food.serving_label)
+        .maybeSingle();
+      return data?.id ?? null;
+    },
+  });
+  const isFav = !!favQuery.data;
+
+  const toggleFav = useMutation({
+    mutationFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Not signed in");
+      if (isFav && favQuery.data) {
+        const { error } = await supabase.from("food_favorites").delete().eq("id", favQuery.data);
+        if (error) throw error;
+        return false;
+      }
+      const { error } = await supabase.from("food_favorites").insert({
+        user_id: u.user.id,
+        food_name: food.name,
+        serving_label: food.serving_label,
+        calories: food.calories,
+        protein_g: food.protein_g,
+        carbs_g: food.carbs_g,
+        fat_g: food.fat_g,
+        sugar_g: food.sugar_g ?? 0,
+        fiber_g: food.fiber_g ?? 0,
+        sodium_mg: food.sodium_mg ?? 0,
+        fdc_id: food.fdc_id ?? null,
+      });
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: (added) => {
+      qc.invalidateQueries({ queryKey: ["food_favorites"] });
+      favQuery.refetch();
+      toast.success(added ? "Zu Favoriten hinzugefügt" : "Aus Favoriten entfernt");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Fehler"),
+  });
+
   const mut = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -606,8 +653,23 @@ function ServingDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
-        <h3 className="text-xl font-semibold">{food.name}</h3>
-        <p className="text-xs text-muted-foreground">{food.serving_label}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-xl font-semibold">{food.name}</h3>
+            <p className="text-xs text-muted-foreground">{food.serving_label}</p>
+          </div>
+          <button
+            onClick={() => toggleFav.mutate()}
+            disabled={toggleFav.isPending}
+            aria-label={isFav ? "Aus Favoriten entfernen" : "Zu Favoriten"}
+            className={cn(
+              "rounded-full p-2 transition",
+              isFav ? "text-primary" : "text-muted-foreground hover:text-primary",
+            )}
+          >
+            <Star className={cn("h-5 w-5", isFav && "fill-primary")} />
+          </button>
+        </div>
 
         <div className="mt-5">
           <Label className="text-xs uppercase tracking-widest text-muted-foreground">
